@@ -25,7 +25,7 @@ class BusinessConnectionManager:
 
         return None
 
-    def remove_duplicate_con(self, tg_id: int):
+    def remove_duplicate_con(self, tg_id: int) -> bool:
         for i in range(len(self._bus_cons)):
             if self._bus_cons[i].tg_user_id == tg_id:
                 del self._bus_cons[i]
