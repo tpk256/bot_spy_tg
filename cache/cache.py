@@ -11,7 +11,7 @@ class Cache:
     _cached: dict
     _conn: sqlite3.Connection
 
-    def __init__(self, db_conn: sqlite3.Connection, max_size=10):
+    def __init__(self, db_conn: sqlite3.Connection, max_size=5000):
         self._cached = dict()
         self._conn = db_conn
         self._max_size = max_size

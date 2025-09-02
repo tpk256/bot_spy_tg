@@ -49,13 +49,20 @@ async def business_connection(bs_conn: types.BusinessConnection):
 
         return
     if bs_conn.is_enabled:
+        if b_manager.remove_duplicate_con(tg_id=bs_conn.user.id):
+            BotSingle.logger.info(f"Success reconnection with tg_id {bs_conn.user.id}")
+            await BotSingle.bot.send_message(
+                chat_id=bs_conn.user_chat_id,
+                text="Произведено переподключение!(вероятно, вы подключали/отключали чат/чаты"
+            )
+        else:
+            BotSingle.logger.info(f"Success connection with tg_id {bs_conn.user.id}")
+            await BotSingle.bot.send_message(
+                chat_id=bs_conn.user_chat_id,
+                text="Вы успешно подключили бота!"
+            )
 
         b_manager.add_conn(bs_conn)
-        BotSingle.logger.info(f"Success connection with tg_id {bs_conn.user.id}")
-        await BotSingle.bot.send_message(
-            chat_id=bs_conn.user_chat_id,
-            text="Вы успешно подключили бота!"
-        )
 
     else:
         b_manager.remove_conn(bs_conn)
