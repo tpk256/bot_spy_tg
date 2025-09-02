@@ -2,3 +2,5 @@
 .env
 .idea/
 __pycache__/
+msgs.db
+logs/logs.txt
