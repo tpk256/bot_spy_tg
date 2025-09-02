@@ -1,0 +1,31 @@
+2025-09-02 16:09:08;DEBUG;Using proactor: IocpProactor
+2025-09-02 16:09:08;INFO;Start polling
+2025-09-02 16:09:12;INFO;Run polling for bot @te2s1t_spy_bot id=8268990267 - 'test_spy'
+2025-09-02 16:09:29;INFO;Success connection with tg_id 1065191807
+2025-09-02 16:09:30;INFO;Update id=291697771 is handled. Duration 562 ms by bot id=8268990267
+2025-09-02 16:10:37;DEBUG;Using proactor: IocpProactor
+2025-09-02 16:10:37;INFO;Start polling
+2025-09-02 16:10:38;INFO;Run polling for bot @te2s1t_spy_bot id=8268990267 - 'test_spy'
+2025-09-02 16:10:43;INFO;/check from 1065191807
+2025-09-02 16:10:43;INFO;Update id=291697772 is handled. Duration 547 ms by bot id=8268990267
+2025-09-02 16:10:54;INFO;Remove connection with tg_id 1065191807; Vlx02Fg0uUkXDgAAYZuuhqYG2vo
+2025-09-02 16:10:55;INFO;Update id=291697773 is handled. Duration 202 ms by bot id=8268990267
+2025-09-02 16:10:57;INFO;Success connection with tg_id 1065191807; Exrzq94ZuUmsGAAAr2fYlwOO_8Y
+2025-09-02 16:10:57;INFO;Update id=291697774 is handled. Duration 327 ms by bot id=8268990267
+2025-09-02 16:11:06;INFO;Success reconnection with tg_id 1065191807; Exrzq94ZuUmsGAAAr2fYlwOO_8Y
+2025-09-02 16:11:07;INFO;Update id=291697775 is handled. Duration 327 ms by bot id=8268990267
+2025-09-02 16:17:06;INFO;Polling stopped
+2025-09-02 16:17:06;ERROR;Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-09-02 16:17:06;WARNING;Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8268990267)
+2025-09-02 16:17:19;DEBUG;Using proactor: IocpProactor
+2025-09-02 16:17:19;INFO;Start polling
+2025-09-02 16:17:20;INFO;Run polling for bot @te2s1t_spy_bot id=8268990267 - 'test_spy'
+2025-09-02 16:17:24;INFO;Remove connection with tg_id 1065191807; Exrzq94ZuUmsGAAAr2fYlwOO_8Y
+2025-09-02 16:17:25;INFO;Update id=291697776 is handled. Duration 609 ms by bot id=8268990267
+2025-09-02 16:17:30;INFO;Success connection with tg_id 1065191807; 29X9RgCHuEmLEgAACwRD9YjpwTA
+2025-09-02 16:17:30;INFO;Update id=291697777 is handled. Duration 422 ms by bot id=8268990267
+2025-09-02 16:18:09;INFO;Success connection with tg_id 1065191807; 29X9RgCHuEmLEgAACwRD9YjpwTA
+2025-09-02 16:18:09;INFO;Update id=291697778 is handled. Duration 188 ms by bot id=8268990267
+2025-09-02 16:18:28;INFO;Polling stopped
+2025-09-02 16:18:28;ERROR;Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-09-02 16:18:28;WARNING;Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8268990267)

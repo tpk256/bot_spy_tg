@@ -25,12 +25,10 @@ class BusinessConnectionManager:
 
         return None
 
-    def remove_duplicate_con(self, tg_id: int) -> bool:
-        for i in range(len(self._bus_cons)):
-            if self._bus_cons[i].tg_user_id == tg_id:
-                del self._bus_cons[i]
+    def has_connection(self, bus_id_: str) -> bool:
+        for b_c in self._bus_cons:
+            if b_c.id == bus_id_:
                 return True
-
         return False
 
 

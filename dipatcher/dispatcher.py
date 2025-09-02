@@ -49,24 +49,24 @@ async def business_connection(bs_conn: types.BusinessConnection):
 
         return
     if bs_conn.is_enabled:
-        if b_manager.remove_duplicate_con(tg_id=bs_conn.user.id):
-            BotSingle.logger.info(f"Success reconnection with tg_id {bs_conn.user.id}")
-            await BotSingle.bot.send_message(
-                chat_id=bs_conn.user_chat_id,
-                text="Произведено переподключение!(вероятно, вы подключали/отключали чат/чаты"
-            )
-        else:
-            BotSingle.logger.info(f"Success connection with tg_id {bs_conn.user.id}")
-            await BotSingle.bot.send_message(
-                chat_id=bs_conn.user_chat_id,
-                text="Вы успешно подключили бота!"
-            )
+        BotSingle.logger.info(f"Success connection with tg_id {bs_conn.user.id}; {bs_conn.id}")
 
+        if b_manager.has_connection(bs_conn.id):
+            await BotSingle.bot.send_message(
+                chat_id=bs_conn.user_chat_id,
+                text=f"Вы успешно подключили/отключили чат!"
+            )
+            return
+
+        await BotSingle.bot.send_message(
+            chat_id=bs_conn.user_chat_id,
+            text=f"Вы успешно включили бота!"
+        )
         b_manager.add_conn(bs_conn)
 
     else:
         b_manager.remove_conn(bs_conn)
-        BotSingle.logger.info(f"Remove connection with tg_id {bs_conn.user.id}")
+        BotSingle.logger.info(f"Remove connection with tg_id {bs_conn.user.id}; {bs_conn.id}")
         await BotSingle.bot.send_message(
             chat_id=bs_conn.user_chat_id,
             text="Вы отключили бота :("
