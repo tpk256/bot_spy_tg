@@ -29,7 +29,8 @@ class Cache:
     def get(self, key, flag_deleted_message=False):
 
         if key not in self._cached:
-            js_data = get_message_json(key, cursor=self._conn.cursor())
+            with self._conn.cursor() as cursor:
+                js_data = get_message_json(key, cursor=cursor)
             if not js_data:
                 return None
 
