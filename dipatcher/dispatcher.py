@@ -89,8 +89,13 @@ async def business_message(msg: types.Message):
                 msg.message_id
             ), msg
         )
-    with conn.cursor() as cursor:
+
+    try:
+        cursor = conn.cursor()
         save_message(msg=msg, conn=conn, cursor=cursor)
+    finally:
+        cursor.close()
+
     BotSingle.logger.info(cache)
 
 
@@ -131,8 +136,12 @@ async def edited_business_message(msg: types.Message):
                 msg.message_id
             ), msg
         )
-    with conn.cursor() as cursor:
+    try:
+        cursor = conn.cursor()
         save_message(msg=msg, conn=conn, cursor=cursor)
+    finally:
+        cursor.close()
+
     BotSingle.logger.info(cache)
 
 
@@ -148,10 +157,11 @@ async def deleted_business_message(msg: types.BusinessMessagesDeleted):
     for del_id in deleted_messages:
 
         try:
-            with conn.cursor() as cursor:
-                json_old = get_message_json_before_delete(
-                    (msg.chat.id, del_id, bs_conn.tg_user_id), cursor=cursor
-                )
+            cursor = conn.cursor()
+
+            json_old = get_message_json_before_delete(
+                (msg.chat.id, del_id, bs_conn.tg_user_id), cursor=cursor
+            )
 
             if not json_old:
                 continue
@@ -160,6 +170,8 @@ async def deleted_business_message(msg: types.BusinessMessagesDeleted):
 
         except Exception:
             continue
+        finally:
+            cursor.close()
 
         if old_message.from_user.id == bs_conn.tg_user_id:
             return

@@ -1,7 +1,7 @@
 import sqlite3
 
 from aiogram import types
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import ValidationError
 
 from db import get_message_json
 
@@ -29,8 +29,13 @@ class Cache:
     def get(self, key, flag_deleted_message=False):
 
         if key not in self._cached:
-            with self._conn.cursor() as cursor:
+
+            try:
+                cursor = self._conn.cursor()
                 js_data = get_message_json(key, cursor=cursor)
+            finally:
+                cursor.close()
+
             if not js_data:
                 return None
 
