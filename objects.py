@@ -22,6 +22,8 @@ class BotSingle:
     def remove_from_wh(cls, id_: int):
         if id_ in cls.white_list:
             cls.white_list.remove(id_)
+        else:
+            return
 
         with open(cls.file_name_wh, mode='w') as f:
             json.dump(cls.white_list, f)

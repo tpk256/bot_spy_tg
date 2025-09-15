@@ -1,8 +1,9 @@
 import datetime
 import sqlite3
+import os
 
 from aiogram import Dispatcher, types
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 
 from objects import BotSingle
 from managers import BusinessConnectionManager
@@ -15,7 +16,8 @@ b_manager = BusinessConnectionManager()
 dp = Dispatcher()
 conn = sqlite3.connect('msgs.db')
 cache = Cache(db_conn=conn)
-
+# password = os.getenv('password')
+tg_id_admin = int(os.getenv('tg_id_admin'))
 
 
 @dp.message(Command("check"))
@@ -35,6 +37,59 @@ async def check_state(msg: types.Message):
             text="У вас нет доступа к боту."
         )
     BotSingle.logger.info(f"/check from {msg.from_user.id}")
+
+
+@dp.message(Command("add"))
+async def add_in_white_list(
+        msg: types.Message,
+        command: CommandObject
+):
+
+
+    if msg.from_user.id != tg_id_admin:
+        return await msg.answer("access denied!")
+    tg_id = command.args.strip()
+
+    if not tg_id.isdigit():
+        return await msg.answer("Неверный формат id")
+
+    tg_id = int(tg_id)
+    BotSingle.add_to_wh(tg_id)
+
+    return await msg.answer(f"уСПЕШНО ДОБАВЛЕН В WHITE_LIST {tg_id}")
+
+
+@dp.message(Command("remove"))
+async def remove_from_white_list(
+        msg: types.Message,
+        command: CommandObject
+):
+
+
+    if msg.from_user.id != tg_id_admin:
+        return await msg.answer("access denied!")
+    tg_id = command.args.strip()
+
+    if not tg_id.isdigit():
+        return await msg.answer("Неверный формат id")
+
+    tg_id = int(tg_id)
+    BotSingle.remove_from_wh(tg_id)
+
+    return await msg.answer(f"id: {tg_id} удален из white_list")
+
+
+@dp.message(Command("white_list"))
+async def show_white_list(
+        msg: types.Message,
+):
+
+    if msg.from_user.id != tg_id_admin:
+        return await msg.answer("access denied!")
+
+    return await msg.answer(f"White_list: {BotSingle.white_list}")
+
+
 
 
 @dp.business_connection()

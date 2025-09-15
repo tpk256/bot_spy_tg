@@ -2,16 +2,19 @@ import asyncio
 import logging
 import json
 import os
+import threading
+
 
 from aiogram import Bot
 from dotenv import load_dotenv
+
+load_dotenv()
 
 from objects import BotSingle
 from loggers import get_logger
 from dipatcher import dp
 
 
-load_dotenv()
 
 token = os.getenv('token')
 
