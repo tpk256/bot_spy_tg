@@ -1,21 +1,21 @@
 import sqlite3
+import typing
 
 from aiogram import types
 from pydantic import ValidationError
 
-from db import get_message_json
+from db import DataBase
+from models import TelegramMessage, BusinessConnection
 
 
 class Cache:
 
-    _cached: dict
-    _conn: sqlite3.Connection
+    _cached: dict[tuple[int, int, str], TelegramMessage]
 
-    def __init__(self, db_conn: sqlite3.Connection, max_size=5000):
+    def __init__(self, db: DataBase, max_size=1000):
         self._cached = dict()
-        self._conn = db_conn
+        self._db = db
         self._max_size = max_size
-
 
     def _normilize_size(self):
         if len(self._cached) + 1 >= self._max_size:
@@ -26,31 +26,27 @@ class Cache:
         self._normilize_size()
         self._cached[key] = value
 
-    def get(self, key, flag_deleted_message=False):
+    def get(self, key, bs_conn: BusinessConnection, flag_deleted_message=False) -> typing.Optional[TelegramMessage]:
 
         if key not in self._cached:
+            # Нужно удостовериться что сообщения точно нет
+            wrapper_message = self._db.get_message(key, bs_conn)
 
-            try:
-                cursor = self._conn.cursor()
-                js_data = get_message_json(key, cursor=cursor)
-            finally:
-                cursor.close()
-
-            if not js_data:
+            if not wrapper_message:
                 return None
 
             self._normilize_size()
 
-            try:
-                msg = types.Message(**js_data)
-                self._cached[key] = msg
-                return msg
-            except ValidationError:
-                pass
+            self._cached[key] = wrapper_message
 
-            self._cached[key] = js_data
-            return js_data
 
+        if flag_deleted_message:
+            self._db.delete_message(
+                key,
+                self._cached[key].telegram_message_version,
+                bs_conn
+
+            )
 
         return self._cached[key]
 

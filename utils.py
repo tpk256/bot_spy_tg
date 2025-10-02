@@ -4,8 +4,9 @@ from aiogram import Bot, Dispatcher, types
 
 
 from objects import BotSingle
+from models import TelegramMessage
 from managers import BusinessConnectionManager
-from db import save_message
+
 from cache import Cache
 
 
@@ -49,10 +50,12 @@ from cache import Cache
 #         await resend_single(msg, chat_id)
 
 
-async def resend_single(msg: types.Message, bot: Bot, chat_id: int):
+async def resend_single(wrapper_msg: TelegramMessage, bot: Bot, chat_id: int):
     """
     Пересылка одного сообщения.
     """
+
+    msg = wrapper_msg.telegram_message
 
     if msg.text:
         return await bot.send_message(chat_id, msg.text)

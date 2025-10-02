@@ -1,0 +1,1 @@
+from .router import dp as message_router

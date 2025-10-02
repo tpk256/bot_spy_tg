@@ -3,67 +3,45 @@ from typing import Optional
 from aiogram import types
 
 from models import BusinessConnection
+from db import DataBase
 
 
 
 class BusinessConnectionManager:
-    _bus_cons: list[BusinessConnection]
+    _bus_cons: dict[str, BusinessConnection]
 
-    def __init__(self):
-        self._bus_cons = list()
+    def __init__(self, db: DataBase, load_from_db: bool = True):
 
-    def get_state_bus_conn_by_tg_id(self, tg_id: int) -> bool:
-        for i in range(len(self._bus_cons)):
-            if self._bus_cons[i].tg_user_id == tg_id:
-                return True
+        self.db = db
+        self._bus_cons = dict()
+        if load_from_db:
+            self._bus_cons = db.load_business_connections()
 
-        return False
-    def validate_bs_conn(self, bus_id_: str) -> Optional[BusinessConnection]:
-        for i in range(len(self._bus_cons)):
-            if self._bus_cons[i].id == bus_id_:
-                return self._bus_cons[i]
+    def get_business_connection_by_id(self, business_connection_id: str) -> Optional[BusinessConnection]:
+        return self._bus_cons.get(business_connection_id, None)
 
-        return None
+    def remove_business_connection_by_id(self, business_connection_id: str):
 
-    def has_connection(self, bus_id_: str) -> bool:
-        for b_c in self._bus_cons:
-            if b_c.id == bus_id_:
-                return True
-        return False
+        bus_conn = self.get_business_connection_by_id(business_connection_id)
+        if not bus_conn: return
 
+        self._bus_cons.pop(business_connection_id)
+        self.db.remove_business_connections(bus_conn.id)
 
-    def add_conn(self, b_conn: types.BusinessConnection):
-        self._bus_cons.append(
-            BusinessConnection(
-                id=b_conn.id,
-                tg_user_id=b_conn.user.id,
-                bot_chat_id=b_conn.user_chat_id
-            )
+    def add_business_connection(self, business_connection: types.BusinessConnection):
+
+        row_id = self.db.add_business_connections(business_connection)
+        self._bus_cons[business_connection.id] = BusinessConnection(
+            id=row_id,
+            telegram_user_id=business_connection.user.id,
+            telegram_business_connection_id=business_connection.id,
+            telegram_user_chat_id=business_connection.user_chat_id,
+            telegram_date_created=int(business_connection.date.timestamp())
         )
 
-    def remove_conn(self, b_conn: types.BusinessConnection):
-        b_id = b_conn.id
-
-        for i in range(len(self._bus_cons)):
-            if self._bus_cons[i].id == b_id:
-                del self._bus_cons[i]
-                break
-
-    def need_save(self, msg: types.Message | types.BusinessMessagesDeleted) -> Optional[BusinessConnection]:
-        b_id = msg.business_connection_id
-
-        bus_conn = None
-
-        for i in range(len(self._bus_cons)):
-            if self._bus_cons[i].id == b_id:
-                bus_conn = self._bus_cons[i]
-                break
-
-        if not bus_conn:
-            return bus_conn
-
-        # if msg.from_user and msg.from_user.id == bus_conn.tg_user_id:
-        #     return None
-
-        return bus_conn
+    def get_business_connection_by_user_id(self, user_id: int) -> Optional[BusinessConnection]:
+        for k, v in self._bus_cons.items():
+            if v.telegram_user_id == user_id:
+                return self._bus_cons[k]
+        return None
 

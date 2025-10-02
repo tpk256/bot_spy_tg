@@ -4,8 +4,12 @@ from typing import Optional
 
 from aiogram import Bot
 
+from db import DataBase
+from managers import BusinessConnectionManager
 
 class BotSingle:
+    data_base: DataBase
+    bs_manager: BusinessConnectionManager
     bot: Optional[Bot] = None
     white_list: list[int] = []
     file_name_wh: str = "white_list.json"
