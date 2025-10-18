@@ -19,6 +19,15 @@ class TelegramMessage(BaseModel):
     telegram_message_version: int   # какое по счёту изменение
 
     telegram_message: types.Message
+    is_deleted: bool = False
+
+
+class Task(BaseModel):
+    chat_id: int
+    business_conn_id: int
+    for_user_chat_id: int
+
+
 
 
 

@@ -13,6 +13,55 @@ class DataBase:
     def __init__(self, database: str = 'msgs.db'):
         self.connection = sqlite3.connect(database)
 
+    def get_chats_by_user_id(self, bus_id: int) -> list[list[int]]:
+        cursor = self.connection.cursor()
+        result = []
+        try:
+            cursor.execute(
+                """
+                    SELECT DISTINCT
+                        business_conn_id,
+                        telegram_chat_id
+                    FROM 
+                        Messages 
+                    WHERE 
+                        business_conn_id = ?
+                    LIMIT 40;
+                """, (bus_id, )
+            )
+            for row in cursor.fetchall():
+                result.append(row)
+        finally:
+            cursor.close()
+
+        return result
+
+    def get_bus_id_by_user_id(self, tg_user_id: int) -> list[list[int]]:
+        cursor = self.connection.cursor()
+        result = []
+        try:
+            cursor.execute(
+                """
+                    SELECT 
+                        id, telegram_date_created, telegram_date_deleted
+                    FROM 
+                        BusinessConnection 
+                    WHERE 
+                        telegram_user_id = ?
+                        
+                    ORDER BY
+                        id DESC 
+                    LIMIT 40;
+                """, (tg_user_id, )
+            )
+            for row in cursor.fetchall():
+                result.append(row)
+        finally:
+            cursor.close()
+
+        return result
+
+
     def load_business_connections(self) -> dict[str, BusinessConnection]:
         result = dict()
         cursor = self.connection.cursor()
@@ -192,4 +241,53 @@ class DataBase:
         finally:
             cursor.close()
         return wrapper_message
+
+    def get_messages_by_chat_id_and_bus_id(self, chat_id: int, bus_con_id: int) -> list[TelegramMessage]:
+        cursor = self.connection.cursor()
+        try:
+            cursor.execute(
+                """
+                    SELECT
+                        telegram_business_connection_id
+                    FROM
+                        BusinessConnection
+                    WHERE
+                        id = ?
+                """, (bus_con_id, )
+            )
+            res = cursor.fetchone()
+            if not res:
+                return []
+
+            telegram_bus_conn = res[0]
+
+            cursor.execute(
+                """
+                    SELECT
+                        telegram_message_id, json, telegram_message_version, is_deleted
+                    FROM
+                        Messages
+                    WHERE
+                        telegram_chat_id = ? AND
+                        business_conn_id = ?
+                    ORDER BY telegram_message_id, telegram_message_version;
+                """, (chat_id, bus_con_id)
+            )
+            res_msgs = []
+            for raw_msg in cursor.fetchall():
+
+                tg_msg_id, json_loads, telegram_message_version, is_deleted = raw_msg
+                tg_msg = types.Message(**json.loads(json_loads))
+                wrapper_message = TelegramMessage(
+                    telegram_message=tg_msg,
+                    business_conn_id=telegram_bus_conn,
+                    telegram_chat_id=chat_id,
+                    telegram_message_id=tg_msg_id,
+                    telegram_message_version=telegram_message_version,
+                    is_deleted=bool(is_deleted)
+                )
+                res_msgs.append(wrapper_message)
+        finally:
+            cursor.close()
+        return res_msgs
 

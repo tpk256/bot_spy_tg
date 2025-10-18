@@ -2,10 +2,170 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>{{ title }}</title>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <link href="static/css/style.css" rel="stylesheet"/>
+  <script src="static/js/script.js" type="text/javascript">
+
+  </script>
 </head>
 <body>
-  <h1>Привет, {{ username }}!</h1>
-  <p>Добро пожаловать на сайт.</p>
+  <div class="page_wrap">
+
+     <div class="page_header">
+
+      <div class="content">
+      
+       <div class="text bold">
+          Чат с {{ name }}; username: @{{ username }}
+                
+       </div>
+      </div>
+     </div>
+
+     <div class="page_body chat_page">
+        <div class="history">
+          {% for message_group in message_groups %}
+            <div class="message default clearfix" id="message{{ message_group[0].telegram_message_id }}">
+                
+
+
+
+
+                  {% if message_group[0].telegram_message.from_user.id == chat_id %}
+                    <div class="pull_left userpic_wrap" style="width: 42px; height: 42px; font-size: 24px; background-color: red;">
+          
+                    </div>
+                  {% else %}
+                    <div class="pull_left userpic_wrap" style="width: 42px; height: 42px; font-size: 24px; background-color: green;">
+          
+                    </div>
+                    
+                  {% endif %}
+                
+
+              
+              <div class="body">
+                  <div class="pull_right date details" title="TIME">XXXX</div>
+                  <div class="from_name"> 
+                    {{ message_group[0].telegram_message.from_user.first_name }} 
+                    {% if message_group[0].telegram_message.from_user.last_name %}
+                      {{ message_group[0].telegram_message.from_user.last_name }}
+                    {% endif %}
+                  </div>
+                  {% if message_group[0].telegram_message.reply_to_message %}
+                    <div class="reply_to details">
+                        In reply to
+                        <a href="#message{{ message_group[0].telegram_message.reply_to_message.message_id }}" onclick="return GoToMessage({{ message_group[0].telegram_message.reply_to_message.message_id }})">this message</a>
+                    </div>
+                  {% endif %}
+                  
+
+                      <div class="text" id="msg_vers_{{ message_group[0].telegram_message_id}}"> 
+                          {% if message_group[0].is_deleted %}
+                                  message is_deleted: 
+                          {% endif %}
+
+                          {% set caption = message_group[0].telegram_message.caption %}
+
+                          {% if message_group[0].telegram_message.text %}
+                            {{ message_group[0].telegram_message.text }} 
+                          {% elif message_group[0].telegram_message.photo %}
+                            Тип: photo; <br> Подпись: {{ caption }};<br> file_id: {{ message_group[0].telegram_message.photo[-1].file_id }}
+                          {% elif message_group[0].telegram_message.document %}
+                            Тип: document;<br> Подпись: {{ caption }};<br> file_id: {{ message_group[0].telegram_message.document.file_id }}
+                          {% elif message_group[0].telegram_message.audio %}
+                            Тип: audio;<br> Подпись: {{ caption }};<br> file_id: {{ message_group[0].telegram_message.audio.file_id }}
+                          {% elif message_group[0].telegram_message.voice %}
+                            Тип: voice;<br> Подпись: {{ caption }};<br> file_id: {{ message_group[0].telegram_message.voice.file_id }}
+                          {% elif message_group[0].telegram_message.video %}
+                            Тип: video;<br> Подпись: {{ caption }};<br> file_id: {{ message_group[0].telegram_message.video.file_id }}
+                          {% elif message_group[0].telegram_message.sticker %}
+                            Тип: sticker;<br> file_id: {{ message_group[0].telegram_message.sticker.file_id }}
+                          {% elif message_group[0].telegram_message.animation %}
+                            Тип: animation;<br> Подпись: {{ caption }}; <br>file_id: {{ message_group[0].telegram_message.animation.file_id }}
+                          {% elif message_group[0].telegram_message.video_note %}
+                            Тип: video_note;<br> file_id: {{ message_group[0].telegram_message.video_note.file_id }}
+                          {% else %}
+                            ⚠️ Этот тип сообщения пока не поддерживается
+                          {% endif %}
+                          
+                        
+                        
+                        </div>
+                    {% if message_group | length != 1 %}     
+                   
+                        <select id="select_for_{{ message_group[0].telegram_message_id }}">
+          
+                        
+                          {% for message in message_group %}
+                            {% if loop.first %}
+                              <option selected id="{{ message.telegram_message_version }}" data-msg='{{ message.dict() | tojson }}'>v_msg_{{ message.telegram_message_version }}</option>
+
+                            {% else %}
+                              <option id="{{ message.telegram_message_version }}" data-msg='{{ message.dict() | tojson }}' >
+                                v_msg_{{ message.telegram_message_version }} 
+                                {% if message.is_deleted %}
+                                  _deleted
+                                {% endif %}
+                              </option>
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                        
+                        <script>
+                            
+                            document.getElementById("select_for_{{ message_group[0].telegram_message_id }}").addEventListener("change", ()=> {
+                              let sel_obj = document.getElementById("select_for_{{ message_group[0].telegram_message_id }}");
+                              const selectedOption = sel_obj.options[sel_obj.selectedIndex];
+                              console.log(selectedOption.dataset.msg);
+                              let msg = JSON.parse(selectedOption.dataset.msg); 
+                              let div_msg_text = document.getElementById("msg_vers_{{ message_group[0].telegram_message_id}}");
+                              // TODO добавить обработку разных типов сообщений
+                     
+                              if (msg.telegram_message.text){
+                                div_msg_text.innerText = msg.telegram_message.text;
+                                return;
+                              }
+                              
+                              caption = msg.telegram_message.caption
+
+                            if (msg.telegram_message.photo)
+                                div_msg_text.innerText = `Тип: photo;\nПодпись: ${caption};\nfile_id: ${msg.telegram_message.photo[msg.telegram_message.photo.length-1].file_id}`;
+
+                            else if (msg.telegram_message.document)
+                                div_msg_text.innerText = `Тип: document;\nПодпись: ${caption};\nfile_id: ${msg.telegram_message.document.file_id}`;
+
+                            else if (msg.telegram_message.audio)
+                                div_msg_text.innerText = `Тип: audio;\nПодпись: ${caption};\nfile_id: ${msg.telegram_message.audio.file_id}`;
+
+                            else if (msg.telegram_message.voice)
+                                div_msg_text.innerText = `Тип: voice;\nПодпись: ${caption};\nfile_id: ${msg.telegram_message.voice.file_id}`;
+
+                            else if (msg.telegram_message.video)
+                                div_msg_text.innerText = `Тип: video;\nПодпись: ${caption};\nfile_id: ${msg.telegram_message.video.file_id}`;
+
+                            else if (msg.telegram_message.sticker)
+                                div_msg_text.innerText = `Тип: sticker;\nfile_id: ${msg.telegram_message.sticker.file_id}`;
+
+                            else if (msg.telegram_message.animation)
+                                div_msg_text.innerText = `Тип: animation;\nПодпись: ${caption};\nfile_id: ${msg.telegram_message.animation.file_id}`;
+
+                            else if (msg.telegram_message.video_note)
+                                div_msg_text.innerText = `Тип: video_note;\nfile_id: ${msg.telegram_message.video_note.file_id}`;
+                            else
+                                div_msg_text.innerText = `⚠️ Этот тип сообщения пока не поддерживается`;
+                            });
+                        </script>
+                      {% endif %}
+            </div> 
+
+            </div>
+          {% endfor %}
+        </div>
+     </div>
+
+
+
+  
 </body>
 </html>
