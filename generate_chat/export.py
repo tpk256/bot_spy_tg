@@ -88,37 +88,44 @@ def save_pages(path: str, pages: list[str]):
 async def main_export(data_base: DataBase, bot: Bot):
     while True:
         task: Task = BotSingle.queue_export_chats.get()
+        try:
+            msgs = data_base.get_messages_by_chat_id_and_bus_id(
+                chat_id=task.chat_id,
+                bus_con_id=task.business_conn_id
+            )
+            username: str = msgs[0].telegram_message.chat.username
+            name: str = msgs[0].telegram_message.chat.full_name
+            bus_conn_id: int = task.business_conn_id
+            path_folder = export_chat(
+                msgs=msgs,
+                chat_id=task.chat_id,
+                name=name,
+                username=username,
+                bus_id=bus_conn_id
+            )
+            path_archive = create_archives(path_folder, archive_name=f"archieves\\{task.chat_id}_{bus_conn_id}")
 
-        msgs = data_base.get_messages_by_chat_id_and_bus_id(
-            chat_id=task.chat_id,
-            bus_con_id=task.business_conn_id
-        )
-        username: str = msgs[0].telegram_message.chat.username
-        name: str = msgs[0].telegram_message.chat.full_name
-        bus_conn_id: int = task.business_conn_id
-        path_folder = export_chat(
-            msgs=msgs,
-            chat_id=task.chat_id,
-            name=name,
-            username=username,
-            bus_id=bus_conn_id
-        )
-        path_archive = create_archives(path_folder, archive_name=f"archieves\\{task.chat_id}_{bus_conn_id}")
 
+            # отправка архива
+            zip_archive = FSInputFile(path_archive)
+            await bot.send_document(
+                chat_id=task.for_user_chat_id,
+                document=zip_archive
+            )
+            # задержка перед следующим архивом
+            await asyncio.sleep(1)
+            await bot.send_message(
+                chat_id=task.for_user_chat_id,
+                text="Ваш архив."
+            )
+            await asyncio.sleep(15)
+        except Exception as e:
+            await asyncio.sleep(1)
+            await bot.send_message(
+                chat_id=task.for_user_chat_id,
+                text=f"Ошибка при формировании архива {task.chat_id}."
+            )
 
-        # отправка архива
-        zip_archive = FSInputFile(path_archive)
-        await bot.send_document(
-            chat_id=task.for_user_chat_id,
-            document=zip_archive
-        )
-        # задержка перед следующим архивом
-        await asyncio.sleep(1)
-        await bot.send_message(
-            chat_id=task.for_user_chat_id,
-            text="Ваш архив."
-        )
-        await asyncio.sleep(15)
 
 def create_archives(root_path: str, archive_name: str) -> str:
     return shutil.make_archive(archive_name, "zip", root_path)

@@ -145,6 +145,7 @@ async def edited_business_message(msg: types.Message):
 
     BotSingle.logger.info(cache)
 
+
 @dp.deleted_business_messages()
 async def deleted_business_message(msg: types.BusinessMessagesDeleted):
     bs_conn = b_manager.get_business_connection_by_id(msg.business_connection_id)

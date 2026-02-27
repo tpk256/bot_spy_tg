@@ -84,8 +84,13 @@ async def get_copy_chat(msg: types.Message):
     return await msg.answer(text='Выберите сессию', reply_markup=create_keyboard_choice_bus_connection(bus_info))
 
 
+#TODO CRITICAL SECURITY
 @dp.callback_query(lambda q: q.data.startswith("chats_for_bus_"))
 async def query_bus(query: types.CallbackQuery):
+    if query.from_user.id not in BotSingle.white_list:
+        return await query.message.answer(
+            text="Попытка взлома",
+        )
     bus_id = int(query.data.replace("chats_for_bus_", ""))
     await query.answer()
     chat_info = data_base.get_chats_by_user_id(bus_id)
