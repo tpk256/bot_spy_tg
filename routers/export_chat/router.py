@@ -102,6 +102,10 @@ async def query_bus(query: types.CallbackQuery):
 
 @dp.callback_query(lambda q: q.data.startswith("export_"))
 async def query_export(query: types.CallbackQuery):
+    if query.from_user.id not in BotSingle.white_list:
+        return await query.message.answer(
+            text="Попытка взлома",
+        )
     bus_id, chat_id = query.data.replace("export_", "").split("_")
 
     bus_id = int(bus_id)
